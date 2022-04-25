@@ -3,12 +3,12 @@ import os
 from os import system
 from sys import argv
 import numpy as np
-
+import pathlib
 # files path prepare
 pyfile_name, input_file, output_folder, ares_scores_file, top_n = argv
 
 # root_dir = pathlib.Path(__file__).parent.absolute()
-root_dir = '.'
+root_dir = os.getcwd()
 input_path = os.path.join(root_dir, input_file)
 output_path = os.path.join(root_dir, output_folder)
 ares_scores_path = os.path.join(root_dir, ares_scores_file)
