@@ -9,7 +9,9 @@ import os
 # file path prepare
 input_file, output_folder = argv[1], argv[2]
 
-root_dir = pathlib.Path(__file__).parent.absolute()
+# root_dir = pathlib.Path(__file__).parent.absolute()
+root_dir = os.getcwd()
+
 input_path = os.path.join(root_dir, input_file)
 output_path = os.path.join(root_dir, output_folder)
 
