@@ -4,13 +4,31 @@ import logging
 import numpy as np
 import pandas as pd
 import torch
-
-import smtr.datasets as da
-# import atom3d.util.rosetta as rose
-# import e3nn.point.data_helpers as dh
+from collections import defaultdict
 import torch_geometric as tg
 
 logger = logging.getLogger("lightning")
+
+
+def create_dataset(data_file):
+    with open(data_file, 'r') as f:
+        property_type = f.readline().strip().split()
+        data_original = f.read().strip().split('\n\n')
+    dataset = list()
+    atom_dict = defaultdict(lambda: len(atom_dict))
+    for data in data_original:
+        data = data.strip().split('\n')
+        idx = data[0]
+        property = float(data[-1])
+        atoms, atom_coords = [], []
+        for atom_xyz in data[1:-1]:
+            atom, x, y, z = atom_xyz.split()
+            atoms.append(atom)
+            xyz = [float(v) for v in [x, y, z]]
+            atom_coords.append(xyz)
+        atoms = [atom_dict[a] for a in atoms]
+        dataset.append((atoms, atom_coords, property))
+    return dataset, len(atom_dict)
 
 
 def create_transform(label_dir):
