@@ -18,7 +18,7 @@ for file_name in tqdm(os.listdir(ligand_path), desc='docking'):
     # print('starting process {}'.format(process_num))
     if os.path.exists(output_file_path):
         continue
-    command = 'qvina-w --config {} --receptor {} --ligand {} --out {} > /dev/null 2>&1'.format(config_path, receptor_path, file_path, output_file_path)
+    command = 'vina --config {} --receptor {} --ligand {} --out {}'.format(config_path, receptor_path, file_path, output_file_path)
     if os.system(command):
         print('wrong in docking with {}'.format(file_name))
         print('\n --Try Again---')
