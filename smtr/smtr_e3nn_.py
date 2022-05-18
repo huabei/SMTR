@@ -1,5 +1,6 @@
 # %%
 
+import os
 import torch
 from torch import nn
 from torch.nn import functional as F
@@ -27,6 +28,10 @@ import numpy as np
 import torch_geometric
 from torch_geometric.data import Data
 import copy
+import wandb
+from pytorch_lightning.loggers import WandbLogger
+import time
+
 # %%
 
 class SMTR(pl.LightningModule):
@@ -251,12 +256,18 @@ class SMTR(pl.LightningModule):
 	def validation_step(self, val_batch, batch_idx):
 		y_hat = self(val_batch)
 		loss = torch.nn.functional.smooth_l1_loss(y_hat, val_batch.label.float())
-
 		self.log('val_loss', loss)
+		return loss
+	
+	def test_step(self, batch, batch_idx):
+		y_hat = self(batch)
+		loss = torch.nn.functional.smooth_l1_loss(y_hat, batch.label.float())
+		self.predictions['pred'].extend(y_hat.cpu().numpy())
+		self.predictions['true'].extend(batch.label.cpu().numpy())
+		self.predictions['id'].extend(batch.id)
 		return loss
 
 
-# %%
 class Ligand_dataset(Dataset):
     '''create dataset for sm ligand'''
     def __init__(self, file_path, transform=None):
@@ -314,7 +325,6 @@ class Ligand_dataset(Dataset):
 
     
 
-# %%
 def create_transform(k=5):
     return partial(prepare, k=k)
 def prepare(item, k=5):
@@ -338,24 +348,49 @@ def prepare(item, k=5):
     d.id = item['id']
     return d
 
+
 # %%
-train_dataset = 'data_test.txt'
-val_dataset = 'data_test.txt'
+learning_rate = 1e-8
+max_epoch = 5
+if_new_train = True
+
+
+# %%
+project = 'smtr_e3nn'
+wandb.init(project=project)
+wandb_logger = WandbLogger(save_dir='.')
+train_dataset = 'dataset/data_train.txt'
+val_dataset = 'dataset/data_test.txt'
 transform = create_transform()
+
 
 # %%
 
 # data
 train_dataset = Ligand_dataset(train_dataset, transform=transform)
-val_dataset = train_dataset
+val_dataset = Ligand_dataset(val_dataset, transform=transform)
 train_dataloader = torch_geometric.loader.DataLoader(train_dataset)
 val_dataloader = torch_geometric.loader.DataLoader(val_dataset)
 
 
+
 # %%
-smnn = SMTR()
-trainer = pl.Trainer()
+if if_new_train:
+    # file_position = time.strftime("%Y%m%d_%H%M%S", time.localtime())
+    # os.mkdir(file_position)
+    smnn = SMTR(learning_rate=learning_rate)
+else:
+    smnn = SMTR().load_from_checkpoint(checkpoint_path='20220515_155614.ckpt')
+trainer = pl.Trainer(logger=wandb_logger, max_epochs=max_epoch,
+                         auto_scale_batch_size=True)
+
 
 
 # %%
 trainer.fit(smnn, train_dataloader, val_dataloader)
+
+
+# %%
+trainer.save_checkpoint(time.strftime("%Y%m%d_%H%M%S", time.localtime()) + ".ckpt")
+
+
