@@ -63,7 +63,7 @@ class SMTR(pl.LightningModule):
         super().__init__()
         self.save_hyperparameters()
         self.predictions = col.defaultdict(list)
-
+        self.lr = learning_rate
         # Define the input and output representations
         Rs0 = [(8, 0)]
         Rs1 = [(24, 0)]
@@ -86,8 +86,8 @@ class SMTR(pl.LightningModule):
         Rs41_exp = [(6 * 4, 1)]
         Rs42_exp = [(6 * 4, 2)]
         # change from 4 to 36
-        Ds1 = (4, 4)
-        Ds2 = (4, 256)
+        Ds1 = (36, 36)
+        Ds2 = (36, 256)
         Ds3 = (256, 1)
         relu = torch.nn.ReLU()
         # Radial model: R+ -> R^d
@@ -271,7 +271,7 @@ class SMTR(pl.LightningModule):
         return out
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=1e-5)
+        optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
         return optimizer
 
     def training_step(self, train_batch, batch_idx):

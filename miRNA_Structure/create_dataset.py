@@ -96,7 +96,7 @@ def write_data(f, data_dict):
 # prepare files folder path
 # pyfile_path, struc_file_path, results_file_path, output_file = sys.argv
 struc_file_path, results_file_path, output_file = (r"E:\Research\SM_miRNA\Data\Dock\SM\fda.sdf",
- r"E:\Research\SM_miRNA\Data\Dock\miRNA\mir-21\pri\mk_fda_Dock_results", 'mk_fda_dock_result.txt')
+ r"E:\Research\SM_miRNA\Data\Dock\miRNA\mir-21\pri\mk_fda_Dock_results_2", 'mk_fda_dock_result_2.txt')
 root_dir = os.getcwd()
 struc_path = os.path.join(root_dir, struc_file_path)
 results_path = os.path.join(root_dir, results_file_path)
