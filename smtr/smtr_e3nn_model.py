@@ -259,9 +259,9 @@ class SMTR(pl.LightningModule):
         out2 = self.nonlin32(out2)
 
         # out = out0, out1, out2
-        out = torch.cat((out0, out1, out2), dim=-1)
+        # out = torch.cat((out0, out1, out2), dim=-1)
         # Per-channel mean
-        out = scatter_mean(out, d.batch, dim=0)
+        out = scatter_mean(out0, d.batch, dim=0)
 
         out = self.dense1(out)
         out = self.elu(out)
