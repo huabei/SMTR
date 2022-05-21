@@ -63,7 +63,7 @@ class SMTR(pl.LightningModule):
         super().__init__()
         self.save_hyperparameters()
         self.predictions = col.defaultdict(list)
-
+        self.lr = learning_rate
         # Define the input and output representations
         Rs0 = [(8, 0)]
         Rs1 = [(24, 0)]
@@ -259,9 +259,9 @@ class SMTR(pl.LightningModule):
         out2 = self.nonlin32(out2)
 
         # out = out0, out1, out2
-        out = torch.cat((out0, out1, out2), dim=-1)
+        # out = torch.cat((out0, out1, out2), dim=-1)
         # Per-channel mean
-        out = scatter_mean(out, d.batch, dim=0)
+        out = scatter_mean(out0, d.batch, dim=0)
 
         out = self.dense1(out)
         out = self.elu(out)
@@ -271,7 +271,7 @@ class SMTR(pl.LightningModule):
         return out
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=1e-5)
+        optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
         return optimizer
 
     def training_step(self, train_batch, batch_idx):
